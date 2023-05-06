@@ -21,7 +21,17 @@ func GetHandler(w http.ResponseWriter, r *http.Request, s Repository) {
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request, s Repository, k KeyGenerator) {
-	body, _ := io.ReadAll(r.Body)
+	if r.URL.Path != "/" {
+		http.Error(w, "Invalid path", http.StatusBadRequest)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil || len(body) == 0 {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
 	url := string(body)
 
 	defer r.Body.Close()
