@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,6 +34,16 @@ func (s *TestStorage) Get(key string) (string, bool) {
 	}
 }
 
+type TestGenerator struct{}
+
+func NewTestGenerator() *TestGenerator {
+	return &TestGenerator{}
+}
+
+func (s *TestGenerator) Generate() string {
+	return "test"
+}
+
 func TestGetHandler(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -48,23 +60,31 @@ func TestGetHandler(t *testing.T) {
 		{
 			name:         "Invalid Request",
 			method:       http.MethodGet,
-			path:         "/Some",
+			path:         "Some",
 			expectedCode: http.StatusBadRequest,
 		},
 		{
 			name:         "Valid Request",
 			method:       http.MethodGet,
-			path:         "/test",
+			path:         "test",
 			expectedCode: http.StatusTemporaryRedirect,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := httptest.NewRequest(tt.method, tt.path, nil)
 			w := httptest.NewRecorder()
-			s := NewTestStorage()
+			r := httptest.NewRequest(http.MethodGet, "/{id}", nil)
 
-			GetHandler(w, r, s)
+			ctx := chi.NewRouteContext()
+			ctx.URLParams.Add("id", tt.path)
+			r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, ctx))
+
+			s := Server{
+				s: NewTestStorage(),
+				k: NewTestGenerator(),
+			}
+
+			s.GetHandler(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 		})
@@ -112,7 +132,11 @@ func TestPostHandler(t *testing.T) {
 			s := NewTestStorage()
 			k := NewGenerator(s)
 
-			PostHandler(w, r, s, k)
+			server := Server{
+				s: s,
+				k: k,
+			}
+			server.PostHandler(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 			assert.Regexp(t, regexp.MustCompile(tt.expectedBodyRegexp), w.Body.String(), "Тело ответа не совпадает с ожидаемым")

@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
-func GetHandler(w http.ResponseWriter, r *http.Request, s Repository) {
-	path := r.URL.Path
-	idSlice := []byte(path)[1:]
+func (serv *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
 
-	url, ok := s.Get(string(idSlice))
+	url, ok := serv.s.Get(id)
 	if !ok {
 		http.Error(w, "url for ID not found", http.StatusBadRequest)
 		return
@@ -20,7 +21,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request, s Repository) {
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func PostHandler(w http.ResponseWriter, r *http.Request, s Repository, k KeyGenerator) {
+func (serv *Server) PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "Invalid path", http.StatusBadRequest)
 		return
@@ -36,22 +37,15 @@ func PostHandler(w http.ResponseWriter, r *http.Request, s Repository, k KeyGene
 
 	defer r.Body.Close()
 
-	hash := k.Generate()
-	s.Set(hash, url)
+	hash := serv.k.Generate()
+	serv.s.Set(hash, url)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte(fmt.Sprintf("%s/%s", Host, hash)))
 }
 
-func MainHandler(s Repository, k KeyGenerator) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			GetHandler(w, r, s)
-		} else if r.Method == http.MethodPost {
-			PostHandler(w, r, s, k)
-		} else {
-			http.Error(w, "Only GET/POST requsts are currently supported", http.StatusMethodNotAllowed)
-		}
-	}
+type Server struct {
+	s Repository
+	k KeyGenerator
 }
