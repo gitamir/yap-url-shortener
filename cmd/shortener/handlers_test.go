@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gitamir/yap-url-shortener/cmd/config"
+	"github.com/gitamir/yap-url-shortener/internal/config"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,6 +43,19 @@ func NewTestGenerator() *TestGenerator {
 
 func (s *TestGenerator) Generate() string {
 	return "test"
+}
+
+func NewTestServer() *Server {
+	store := NewTestStorage()
+	keyGenerator := NewGenerator(store)
+	return &Server{
+		s: store,
+		k: keyGenerator,
+		c: config.Options{
+			Host:         "localhost:8080",
+			ResolvedHost: "http://localhost:8080",
+		},
+	}
 }
 
 func TestGetHandler(t *testing.T) {
@@ -80,7 +93,7 @@ func TestGetHandler(t *testing.T) {
 			ctx.URLParams.Add("id", tt.path)
 			r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, ctx))
 
-			s := NewServer(NewTestStorage(), NewTestGenerator())
+			s := NewTestServer()
 
 			s.GetHandler(w, r)
 
@@ -127,17 +140,8 @@ func TestPostHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := httptest.NewRequest(tt.method, tt.path, strings.NewReader(tt.body))
 			w := httptest.NewRecorder()
-			s := NewTestStorage()
-			k := NewGenerator(s)
 
-			server := Server{
-				s: s,
-				k: k,
-				c: config.Options{
-					Host:         "localhost:8080",
-					ResolvedHost: "http://localhost:8080",
-				},
-			}
+			server := NewTestServer()
 			server.PostHandler(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")

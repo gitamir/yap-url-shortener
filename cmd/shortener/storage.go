@@ -1,10 +1,5 @@
 package main
 
-type Repository interface {
-	Set(string, string)
-	Get(string) (string, bool)
-}
-
 type Storage struct {
 	Urls map[string]string
 }

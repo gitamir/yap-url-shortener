@@ -18,6 +18,11 @@ type KeyGenerator interface {
 	Generate() string
 }
 
+type Repository interface {
+	Set(string, string)
+	Get(string) (string, bool)
+}
+
 type Generator struct {
 	storage Repository
 }

@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gitamir/yap-url-shortener/cmd/config"
+	"github.com/gitamir/yap-url-shortener/internal/config"
 	"github.com/go-chi/chi/v5"
 )
 
