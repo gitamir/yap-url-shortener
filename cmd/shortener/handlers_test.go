@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gitamir/yap-url-shortener/cmd/config"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 )
@@ -129,7 +130,14 @@ func TestPostHandler(t *testing.T) {
 			s := NewTestStorage()
 			k := NewGenerator(s)
 
-			server := NewServer(s, k)
+			server := Server{
+				s: s,
+				k: k,
+				c: config.Options{
+					Host:         "localhost:8080",
+					ResolvedHost: "http://localhost:8080",
+				},
+			}
 			server.PostHandler(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")

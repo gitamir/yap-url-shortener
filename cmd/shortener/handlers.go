@@ -56,9 +56,6 @@ func NewServer(s Repository, k KeyGenerator) *Server {
 	return &Server{
 		s: s,
 		k: k,
-		c: config.Options{
-			Host:         *host,
-			ResolvedHost: *resolvedHost,
-		},
+		c: *config.NewConfig(flagHost, flagResolvedHost),
 	}
 }
