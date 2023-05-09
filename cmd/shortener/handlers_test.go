@@ -79,10 +79,7 @@ func TestGetHandler(t *testing.T) {
 			ctx.URLParams.Add("id", tt.path)
 			r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, ctx))
 
-			s := Server{
-				s: NewTestStorage(),
-				k: NewTestGenerator(),
-			}
+			s := NewServer(NewTestStorage(), NewTestGenerator())
 
 			s.GetHandler(w, r)
 
@@ -132,10 +129,7 @@ func TestPostHandler(t *testing.T) {
 			s := NewTestStorage()
 			k := NewGenerator(s)
 
-			server := Server{
-				s: s,
-				k: k,
-			}
+			server := NewServer(s, k)
 			server.PostHandler(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")

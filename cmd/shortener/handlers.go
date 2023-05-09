@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/gitamir/yap-url-shortener/cmd/config"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -42,10 +43,22 @@ func (serv *Server) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(fmt.Sprintf("%s/%s", Host, hash)))
+	w.Write([]byte(fmt.Sprintf("%s/%s", serv.c.ResolvedHost, hash)))
 }
 
 type Server struct {
 	s Repository
 	k KeyGenerator
+	c config.Options
+}
+
+func NewServer(s Repository, k KeyGenerator) *Server {
+	return &Server{
+		s: s,
+		k: k,
+		c: config.Options{
+			Host:         *host,
+			ResolvedHost: *resolvedHost,
+		},
+	}
 }
