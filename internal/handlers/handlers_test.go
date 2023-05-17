@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -49,9 +49,9 @@ func NewTestServer() *Server {
 	store := NewTestStorage()
 	keyGenerator := NewGenerator(store)
 	return &Server{
-		s: store,
-		k: keyGenerator,
-		c: config.Options{
+		storage:      store,
+		keyGenerator: keyGenerator,
+		Config: config.Options{
 			Host:         "localhost:8080",
 			ResolvedHost: "http://localhost:8080",
 		},
@@ -95,7 +95,7 @@ func TestGetHandler(t *testing.T) {
 
 			s := NewTestServer()
 
-			s.GetHandler(w, r)
+			s.GetHandler(w, r, tt.path)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 		})
@@ -113,7 +113,7 @@ func TestPostHandler(t *testing.T) {
 	}{
 		{
 			name:               "Invalid Path",
-			method:             http.MethodGet,
+			method:             http.MethodPost,
 			path:               "/invalid",
 			body:               "http://practicum.ru",
 			expectedBodyRegexp: `Invalid path\n`,
@@ -121,7 +121,7 @@ func TestPostHandler(t *testing.T) {
 		},
 		{
 			name:               "Invalid Body",
-			method:             http.MethodGet,
+			method:             http.MethodPost,
 			path:               "/",
 			body:               "",
 			expectedBodyRegexp: `Invalid request\n`,
@@ -129,7 +129,7 @@ func TestPostHandler(t *testing.T) {
 		},
 		{
 			name:               "Valid Request",
-			method:             http.MethodGet,
+			method:             http.MethodPost,
 			path:               "/",
 			body:               "http://practicum.ru",
 			expectedBodyRegexp: `^http\:\/\/localhost\:\d{1,8}\/\w{8}$`,

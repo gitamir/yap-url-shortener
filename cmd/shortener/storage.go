@@ -1,20 +1,26 @@
 package main
 
+import (
+	"fmt"
+	"sync"
+)
+
 type Storage struct {
-	Urls map[string]string
+	urls sync.Map
 }
 
 func NewStorage() *Storage {
 	return &Storage{
-		Urls: make(map[string]string),
+		urls: sync.Map{},
 	}
 }
 
 func (s *Storage) Set(key, value string) {
-	s.Urls[key] = value
+	s.urls.Store(key, value)
 }
 
 func (s *Storage) Get(key string) (string, bool) {
-	val, ok := s.Urls[key]
-	return val, ok
+	val, ok := s.urls.Load(key)
+	stringValue := fmt.Sprintf("%s", val)
+	return stringValue, ok
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Server interface {
-	GetHandler(w http.ResponseWriter, r *http.Request)
+	GetHandler(w http.ResponseWriter, r *http.Request, id string)
 	PostHandler(w http.ResponseWriter, r *http.Request)
 }
 
@@ -17,7 +17,7 @@ func SetupRouting(server Server) *chi.Mux {
 		server.PostHandler(w, r)
 	})
 	router.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
-		server.GetHandler(w, r)
+		server.GetHandler(w, r, chi.URLParam(r, "id"))
 	})
 	return router
 }

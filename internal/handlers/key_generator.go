@@ -1,8 +1,7 @@
-package main
+package handlers
 
 import (
 	"math/rand"
-	"time"
 )
 
 const (
@@ -10,13 +9,6 @@ const (
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	length = 8
 )
-
-var seededRand *rand.Rand = rand.New(
-	rand.NewSource(time.Now().UnixNano()))
-
-type KeyGenerator interface {
-	Generate() string
-}
 
 type Repository interface {
 	Set(string, string)
@@ -34,18 +26,13 @@ func NewGenerator(storage Repository) *Generator {
 }
 
 func (g *Generator) Generate() string {
-	newStr := randString(length)
-	str, _ := g.storage.Get(newStr)
-	if str != "" {
-		return g.Generate()
-	}
-	return newStr
+	return randString(length)
 }
 
 func randStringWithCharset(length int, charset string) string {
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+		b[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(b)
 }

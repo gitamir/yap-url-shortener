@@ -1,18 +1,15 @@
-package main
+package handlers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/gitamir/yap-url-shortener/internal/config"
-	"github.com/go-chi/chi/v5"
 )
 
-func (serv *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-
-	url, ok := serv.s.Get(id)
+func (serv *Server) GetHandler(w http.ResponseWriter, r *http.Request, id string) {
+	url, ok := serv.storage.Get(id)
 	if !ok {
 		http.Error(w, "url for ID not found", http.StatusBadRequest)
 		return
@@ -34,28 +31,39 @@ func (serv *Server) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := string(body)
+	urlString := string(body)
 
-	defer r.Body.Close()
-
-	hash := serv.k.Generate()
-	serv.s.Set(hash, url)
+	hash := serv.keyGenerator.Generate()
+	str, _ := serv.storage.Get(hash)
+	if str != "" {
+		hash = serv.keyGenerator.Generate()
+	}
+	serv.storage.Set(hash, urlString)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(fmt.Sprintf("%s/%s", serv.c.ResolvedHost, hash)))
+	value, err := url.JoinPath(serv.Config.ResolvedHost, hash)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+	w.Write([]byte(value))
 }
 
 type Server struct {
-	s Repository
-	k KeyGenerator
-	c config.Options
+	storage      Repository
+	keyGenerator KeyGenerator
+	Config       config.Options
 }
 
 func NewServer(s Repository, k KeyGenerator) *Server {
 	return &Server{
-		s: s,
-		k: k,
-		c: *config.NewConfig(flagHost, flagResolvedHost),
+		storage:      s,
+		keyGenerator: k,
+		Config:       *config.NewConfig(),
 	}
+}
+
+type KeyGenerator interface {
+	Generate() string
 }
