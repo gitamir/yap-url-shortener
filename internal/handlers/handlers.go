@@ -8,7 +8,7 @@ import (
 	"github.com/gitamir/yap-url-shortener/internal/config"
 )
 
-func (serv *Server) FullURLForIDHandler(w http.ResponseWriter, r *http.Request, id string) {
+func (serv *Server) GetFullURL(w http.ResponseWriter, r *http.Request, id string) {
 	url, ok := serv.storage.Get(id)
 	if !ok {
 		http.Error(w, "url for ID not found", http.StatusBadRequest)
@@ -19,7 +19,7 @@ func (serv *Server) FullURLForIDHandler(w http.ResponseWriter, r *http.Request, 
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func (serv *Server) ShortenURLHandler(w http.ResponseWriter, r *http.Request) {
+func (serv *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "Invalid path", http.StatusBadRequest)
 		return

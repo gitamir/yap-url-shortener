@@ -96,7 +96,7 @@ func TestGetHandler(t *testing.T) {
 
 			s := NewTestServer()
 
-			s.FullURLForIDHandler(w, r, tt.path)
+			s.GetFullURL(w, r, tt.path)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 		})
@@ -144,7 +144,7 @@ func TestPostHandler(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			server := NewTestServer()
-			server.ShortenURLHandler(w, r)
+			server.ShortenURL(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 			assert.Regexp(t, regexp.MustCompile(tt.expectedBodyRegexp), w.Body.String(), "Тело ответа не совпадает с ожидаемым")
