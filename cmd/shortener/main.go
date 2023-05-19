@@ -6,6 +6,7 @@ import (
 
 	"github.com/gitamir/yap-url-shortener/internal/handlers"
 	"github.com/gitamir/yap-url-shortener/internal/routing"
+	"github.com/gitamir/yap-url-shortener/internal/storage"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 }
 
 func run() error {
-	storage := NewStorage()
+	storage := storage.NewStorage()
 	keyGenerator := handlers.NewGenerator(storage)
 	server := handlers.NewServer(storage, keyGenerator)
 	router := routing.SetupRouting(server)

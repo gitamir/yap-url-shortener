@@ -86,6 +86,7 @@ func TestGetHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, "/{id}", nil)
 
@@ -95,7 +96,7 @@ func TestGetHandler(t *testing.T) {
 
 			s := NewTestServer()
 
-			s.GetHandler(w, r, tt.path)
+			s.FullURLForIDHandler(w, r, tt.path)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 		})
@@ -138,11 +139,12 @@ func TestPostHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			r := httptest.NewRequest(tt.method, tt.path, strings.NewReader(tt.body))
 			w := httptest.NewRecorder()
 
 			server := NewTestServer()
-			server.PostHandler(w, r)
+			server.ShortenURLHandler(w, r)
 
 			assert.Equal(t, tt.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 			assert.Regexp(t, regexp.MustCompile(tt.expectedBodyRegexp), w.Body.String(), "Тело ответа не совпадает с ожидаемым")

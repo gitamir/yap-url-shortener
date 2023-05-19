@@ -7,17 +7,17 @@ import (
 )
 
 type Server interface {
-	GetHandler(w http.ResponseWriter, r *http.Request, id string)
-	PostHandler(w http.ResponseWriter, r *http.Request)
+	FullURLForIDHandler(w http.ResponseWriter, r *http.Request, id string)
+	ShortenUrlHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func SetupRouting(server Server) *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		server.PostHandler(w, r)
+		server.ShortenURLHandler(w, r)
 	})
 	router.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
-		server.GetHandler(w, r, chi.URLParam(r, "id"))
+		server.FullURLForIDHandler(w, r, chi.URLParam(r, "id"))
 	})
 	return router
 }
