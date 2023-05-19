@@ -47,7 +47,7 @@ func (s *TestGenerator) Generate() string {
 
 func NewTestServer() *Server {
 	store := NewTestStorage()
-	keyGenerator := NewGenerator(store)
+	keyGenerator := NewGenerator()
 	return &Server{
 		storage:      store,
 		keyGenerator: keyGenerator,

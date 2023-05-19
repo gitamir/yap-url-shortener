@@ -21,6 +21,6 @@ func (s *Storage) Set(key, value string) {
 
 func (s *Storage) Get(key string) (string, bool) {
 	val, ok := s.urls.Load(key)
-	stringValue := fmt.Sprintf("%s", val)
+	stringValue := fmt.Sprintf("%v", val)
 	return stringValue, ok
 }

@@ -10,19 +10,11 @@ const (
 	length = 8
 )
 
-type Repository interface {
-	Set(string, string)
-	Get(string) (string, bool)
-}
-
 type Generator struct {
-	storage Repository
 }
 
-func NewGenerator(storage Repository) *Generator {
-	return &Generator{
-		storage: storage,
-	}
+func NewGenerator() *Generator {
+	return &Generator{}
 }
 
 func (g *Generator) Generate() string {

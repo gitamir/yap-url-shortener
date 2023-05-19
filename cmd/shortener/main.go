@@ -17,7 +17,7 @@ func main() {
 
 func run() error {
 	storage := storage.NewStorage()
-	keyGenerator := handlers.NewGenerator(storage)
+	keyGenerator := handlers.NewGenerator()
 	server := handlers.NewServer(storage, keyGenerator)
 	router := routing.SetupRouting(server)
 	return http.ListenAndServe(server.Config.Host, router)

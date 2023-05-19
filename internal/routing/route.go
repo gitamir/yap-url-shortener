@@ -8,7 +8,7 @@ import (
 
 type Server interface {
 	FullURLForIDHandler(w http.ResponseWriter, r *http.Request, id string)
-	ShortenUrlHandler(w http.ResponseWriter, r *http.Request)
+	ShortenURLHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func SetupRouting(server Server) *chi.Mux {

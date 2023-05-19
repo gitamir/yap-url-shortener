@@ -67,3 +67,8 @@ func NewServer(s Repository, k KeyGenerator) *Server {
 type KeyGenerator interface {
 	Generate() string
 }
+
+type Repository interface {
+	Set(string, string)
+	Get(string) (string, bool)
+}
